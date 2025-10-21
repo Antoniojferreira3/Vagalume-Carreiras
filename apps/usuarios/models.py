@@ -28,7 +28,7 @@ class Resumo_Profissional(models.Model):
     texto = models.TextField(max_length=500)
 
 class Experiencia(models.Model):
-    cargo = models.CharField(max_lenghth=100)
+    cargo = models.CharField(max_length=100)
     empresa = models.CharField(max_length=100)
     data_inicio = models.DateField()
     data_fim = models.DateField(blank=True, null=True)
@@ -61,7 +61,7 @@ class Vaga(models.Model):
     status = models.BooleanField(default=True)
     data_publicacao = models.DateField(auto_now_add=True)
 
-class Empresa(models.Models):
+class Empresa(models.Model):
     nome = models.CharField(max_length=100)
     email = models.EmailField(max_length=50, unique=True)
     senha = models.CharField(max_length=255) 

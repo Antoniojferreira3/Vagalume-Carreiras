@@ -37,11 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Apps de Terceiros (exemplo)
     'rest_framework',
-
-    # Meus Apps (adicione os seus aqui)
     'apps.usuarios',
     'apps.vagas',
 ]

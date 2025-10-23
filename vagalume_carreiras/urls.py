@@ -1,22 +1,16 @@
-"""
-URL configuration for vagalume_carreiras project.
+# Arquivo: vagalume_carreiras/urls.py
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include  # <-- 1. Adicione o 'include'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # 2. Adicione esta linha:
+    # Ela diz ao Django: "Qualquer URL que comece com 'contas/'...
+    # ...deve ser gerenciada pelo nosso arquivo 'apps.usuarios.urls'".
+    path('contas/', include('apps.usuarios.urls')),
+
+    # (Mais tarde, faremos o mesmo para o app de vagas)
+    # path('', include('apps.vagas.urls')),
 ]

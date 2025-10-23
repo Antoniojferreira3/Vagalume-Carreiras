@@ -1,9 +1,32 @@
 from django.contrib import admin
-from .models import Candidato, Empresa, Recrutador, Experiencia # Importe todos os models deste app
+from django.contrib.auth.admin import UserAdmin
+from .models import (
+    Usuario, Empresa, Candidato, Recrutador, 
+    Resumo_Profissional, Idiomas, Redes_Sociais, 
+    Skill, Experiencia, Formacao_Academica
+)
 
-# Registra os models para que apareçam na área de admin
-admin.site.register(Candidato)
+# Para customizar a exibição do seu Usuário no admin
+class CustomUserAdmin(UserAdmin):
+    model = Usuario
+    # Adiciona os campos customizados ('tipo_usuario', 'telefone') no admin
+    fieldsets = UserAdmin.fieldsets + (
+        ('Campos Personalizados', {'fields': ('tipo_usuario', 'telefone')}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Campos Personalizados', {'fields': ('tipo_usuario', 'telefone')}),
+    )
+
+# Registra o Usuário com a visualização customizada
+admin.site.register(Usuario, CustomUserAdmin)
+
+# Registra todos os outros perfis e modelos
 admin.site.register(Empresa)
+admin.site.register(Candidato)
 admin.site.register(Recrutador)
+admin.site.register(Resumo_Profissional)
+admin.site.register(Idiomas)
+admin.site.register(Redes_Sociais)
+admin.site.register(Skill)
 admin.site.register(Experiencia)
-# Faça isso para todos os models que você quer ver
+admin.site.register(Formacao_Academica)

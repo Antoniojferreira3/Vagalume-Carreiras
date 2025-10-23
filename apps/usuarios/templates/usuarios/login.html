@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Vagalume Carreiras</title>
+    <style>
+        /* Estilos muito básicos para centralizar e organizar */
+        body { font-family: sans-serif; display: grid; place-items: center; min-height: 90vh; background-color: #f4f4f4; }
+        form { background: #fff; border: 1px solid #ccc; padding: 25px; border-radius: 8px; }
+        div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="password"] { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <form method="POST">
+        <h2>Login</h2>
+        <p>Acesse sua conta para continuar.</p>
+
+        {% csrf_token %}
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p class="error">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div>
+            <label for="id_username">Email ou CPF:</label>
+            <input type="text" name="username" id="id_username" required>
+        </div>
+        <div>
+            <label for="id_password">Senha:</label>
+            <input type="password" name="password" id="id_password" required>
+        </div>
+
+        <button type="submit">Entrar</button>
+
+        <hr>
+        <p><a href="#">Esqueceu sua senha?</a></p>
+        <p>Não possui uma conta? <a href="{% url 'cadastro_candidato' %}">Cadastre-se</a></p>
+    </form>
+
+</body>
+</html>

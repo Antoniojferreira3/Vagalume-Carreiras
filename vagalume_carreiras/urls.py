@@ -13,4 +13,5 @@ urlpatterns = [
 
     # (Mais tarde, faremos o mesmo para o app de vagas)
     # path('', include('apps.vagas.urls')),
+    path('', include('apps.vagas.urls')),
 ]

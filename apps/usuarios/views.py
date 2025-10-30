@@ -88,9 +88,10 @@ def logout_view(request):
 
 def home_candidato(request):
     # Esta é a view temporária para o painel do candidato
-    # Mais tarde, vamos substituí-la por um template real
-    return HttpResponse("<h1>Você está logado como CANDIDATO</h1>")
+    # Mais tarde, vamos substituí-la por um template real de listagem de vagas
+    return HttpResponse("<h1>Painel do Candidato</h1><p>Em breve, aqui você verá as vagas.</p>")
 
 def home_recrutador(request):
     # Esta é a view temporária para o painel do recrutador
-    return HttpResponse("<h1>Você está logado como RECRUTADOR</h1>")
+    # Mais tarde, vamos substituí-la por um template real de "minhas vagas"
+    return HttpResponse("<h1>Painel do Recrutador</h1><p>Em breve, aqui você verá suas vagas criadas.</p>")

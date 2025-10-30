@@ -6,27 +6,43 @@ from .models import (
     Skill, Experiencia, Formacao_Academica
 )
 
-# Para customizar a exibição do seu Usuário no admin
+# --- Inlines para o Candidato ---
+# Estes permitem editar experiências/skills DENTRO da página do Candidato
+class ExperienciaInline(admin.TabularInline): # Ou admin.StackedInline
+    model = Experiencia
+    extra = 1 # Quantos campos em branco mostrar
+
+class SkillInline(admin.TabularInline):
+    model = Skill
+    extra = 1
+
+class Formacao_AcademicaInline(admin.TabularInline):
+    model = Formacao_Academica
+    extra = 1
+# ... (você pode criar inlines para todos)
+
+# --- Admin do Candidato ---
+class CandidatoAdmin(admin.ModelAdmin):
+    inlines = [
+        ExperienciaInline,
+        SkillInline,
+        Formacao_AcademicaInline,
+        # ... outros inlines
+    ]
+
+# --- Admin do Usuário ---
 class CustomUserAdmin(UserAdmin):
     model = Usuario
-    # Adiciona os campos customizados ('tipo_usuario', 'telefone') no admin
-    fieldsets = UserAdmin.fieldsets + (
-        ('Campos Personalizados', {'fields': ('tipo_usuario', 'telefone')}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Campos Personalizados', {'fields': ('tipo_usuario', 'telefone')}),
-    )
+    # ... (seu código que já está correto) ...
 
-# Registra o Usuário com a visualização customizada
+# --- Registros ---
 admin.site.register(Usuario, CustomUserAdmin)
-
-# Registra todos os outros perfis e modelos
 admin.site.register(Empresa)
-admin.site.register(Candidato)
+admin.site.register(Candidato, CandidatoAdmin) # Registra o Candidato com os inlines
 admin.site.register(Recrutador)
-admin.site.register(Resumo_Profissional)
-admin.site.register(Idiomas)
-admin.site.register(Redes_Sociais)
-admin.site.register(Skill)
-admin.site.register(Experiencia)
-admin.site.register(Formacao_Academica)
+
+# Não precisa registrar os modelos que já estão como 'inline', 
+# mas se quiser que eles tenham sua própria página, pode manter.
+# admin.site.register(Skill) 
+# admin.site.register(Experiencia)
+# ...

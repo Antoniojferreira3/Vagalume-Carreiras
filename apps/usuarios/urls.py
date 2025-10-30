@@ -1,22 +1,19 @@
 # Arquivo: apps/usuarios/urls.py
 
 from django.urls import path
-from . import views  # Importa as views do app (views.py)
+from . import views 
 
 urlpatterns = [
-    # URL para a página de login
+    # URLs de Autenticação
     path('login/', views.login_view, name='login'),
-
-    # URL para o processo de logout
     path('logout/', views.logout_view, name='logout'),
 
-    # URL para a página de cadastro de candidato
+    # URLs de Cadastro
     path('cadastro/candidato/', views.cadastrar_candidato, name='cadastro_candidato'),
+    # --- NOVA URL ---
+    path('cadastro/recrutador/', views.cadastrar_recrutador, name='cadastro_recrutador'),
 
-    # (Mais tarde, adicionaremos o cadastro da empresa aqui)
-    # path('cadastro/empresa/', views.cadastrar_empresa, name='cadastro_empresa'),
-
-    # URLs de placeholder para os painéis
+    # URLs dos Painéis (Dashboards)
     path('dashboard/candidato/', views.home_candidato, name='home_candidato'),
     path('dashboard/recrutador/', views.home_recrutador, name='home_recrutador'),
 ]

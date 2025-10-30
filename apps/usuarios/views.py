@@ -1,12 +1,20 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
-from .forms import CandidatoCadastroForm # Importa o formulário que acabamos de criar
-from .models import Usuario, Candidato
-from django.db import transaction # Garante que os dois models sejam criados com segurança
+# Importa OS DOIS formulários
+from .forms import CandidatoCadastroForm, RecrutadorCadastroForm 
+# Importa OS TRÊS modelos de perfil
+from .models import Usuario, Candidato, Empresa, Recrutador
+from django.db import transaction 
 from django.contrib import messages
 from django.http import HttpResponse
 
-@transaction.atomic # Garante que ou os dois são criados, ou nenhum é
+# --- Importa os novos decorators ---
+from .decorators import candidato_required, recrutador_required, anonymous_required
+from django.contrib.auth.decorators import login_required # Decorator padrão do Django
+
+
+@anonymous_required 
+@transaction.atomic 
 def cadastrar_candidato(request):
     """
     Processa o formulário de cadastro do UC01.
@@ -15,82 +23,97 @@ def cadastrar_candidato(request):
         form = CandidatoCadastroForm(request.POST)
         
         if form.is_valid():
-            data = form.cleaned_data
+            # AGORA a lógica de salvar está DENTRO do form.save()
+            # Esta linha 'user = form.save()' executa aquele método .save()
+            # que nós criamos dentro da classe CandidatoCadastroForm
+            user = form.save() 
             
-            # 1. Cria o Usuario (Portaria) 
-            # Usamos o email como username, como discutido
-            user = Usuario.objects.create_user(
-                username=data['email'], # Usa email como username
-                email=data['email'],
-                password=data['password'],
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                telefone=data['telefone'],
-                tipo_usuario='candidato'
-            )
+            # 3. Loga o usuário automaticamente
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend') 
             
-            # 2. Cria o Candidato (Sala) 
-            candidato = Candidato.objects.create(
-                usuario=user, # Conecta o perfil ao login
-                cpf=data['cpf']
-            )
-            
-            # 3. Loga o usuário automaticamente após o cadastro
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            
-            # Redireciona para o painel do candidato (vamos criar essa URL depois)
-            return redirect('home_candidato') # 
+            messages.success(request, 'Cadastro realizado com sucesso!')
+            return redirect('home_candidato')
     
     else:
-        # Se for um GET (usuário só abriu a página), mostra um form vazio [cite: 11]
         form = CandidatoCadastroForm()
         
-    # Renderiza a página HTML, passando o formulário para ela
     return render(request, 'usuarios/cadastro_candidato.html', {'form': form})
 
+# --- NOVA VIEW PARA O RECRUTADOR ---
+@anonymous_required # Protege contra usuários já logados
+@transaction.atomic
+def cadastrar_recrutador(request):
+    """
+    Processa o formulário de cadastro do Recrutador.
+    """
+    if request.method == 'POST':
+        form = RecrutadorCadastroForm(request.POST)
+        
+        if form.is_valid():
+            # O método .save() do formulário já cria os 3 objetos
+            user = form.save() 
+            
+            # Loga o usuário automaticamente
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            messages.success(request, 'Cadastro realizado com sucesso! Sua empresa agora está em nossa plataforma.')
+            return redirect('home_recrutador')
+    
+    else:
+        form = RecrutadorCadastroForm()
+        
+    return render(request, 'usuarios/cadastro_recrutador.html', {'form': form})
+
+
+@anonymous_required # Protege contra usuários já logados
 def login_view(request):
     """
     Processa a página de login para Candidatos e Recrutadores (UC03).
     """
     if request.method == 'POST':
-        # No HTML, o <input> deve ter name="username"
-        login_identifier = request.POST.get('username')
+        login_identifier = request.POST.get('username') # 'username' é o name="" do input
         password = request.POST.get('password')
 
-        # O 'authenticate' agora usa nosso EmailOrCPFBackend
+        # O 'authenticate' agora usa nosso EmailOrCPFBackend (se configurado no settings.py)
         user = authenticate(request, username=login_identifier, password=password)
 
         if user is not None:
-            # Login foi bem-sucedido!
             login(request, user)
             
-            # --- TAREFA: CONTROLE DE PERMISSÕES ---
-            # Aqui checamos o "crachá" (tipo_usuario)
+            # --- Controle de Permissões no Login ---
             if user.tipo_usuario == 'candidato':
-                return redirect('home_candidato') # Redireciona para o painel do candidato
+                return redirect('home_candidato') 
             elif user.tipo_usuario == 'recrutador':
-                return redirect('home_recrutador') # Redireciona para o painel da empresa
+                return redirect('home_recrutador') 
             
-            return redirect('pagina_padrao') # Uma página genérica
+            # Se for um admin (sem tipo), redireciona para o admin
+            elif user.is_staff:
+                return redirect('/admin/') # URL padrão do admin
+            
+            return redirect('login') # Fallback
         else:
-            # Login falhou, conforme UC03
             messages.error(request, 'Credenciais inválidas. Por favor, tente novamente.')
             
-    # Se for um GET ou se o login falhar, mostra a página de login
     return render(request, 'usuarios/login.html')
 
+@login_required # Só pode fazer logout se estiver logado
 def logout_view(request):
     """
     Faz o logout do usuário e o redireciona para a tela de login.
     """
     logout(request)
-    return redirect('login') # Redireciona para a URL da página de login
+    messages.info(request, 'Você saiu da sua conta.')
+    return redirect('login') 
 
+
+# --- PROTEGENDO AS VIEWS DO PAINEL ---
+
+@login_required # Requer login
+@candidato_required # Requer que o tipo seja 'candidato'
 def home_candidato(request):
-    # Esta é a view temporária para o painel do candidato
-    # Mais tarde, vamos substituí-la por um template real
-    return HttpResponse("<h1>Você está logado como CANDIDATO</h1>")
+    return render(request, 'dashboard/home_candidato.html') # Mudei para um template real
 
+@login_required # Requer login
+@recrutador_required # Requer que o tipo seja 'recrutador'
 def home_recrutador(request):
-    # Esta é a view temporária para o painel do recrutador
-    return HttpResponse("<h1>Você está logado como RECRUTADOR</h1>")
+    return render(request, 'dashboard/home_recrutador.html') # Mudei para um template real
